@@ -41,7 +41,7 @@ sudo systemctl enable --now kubelet
 sudo systemctl restart kubelet
 
 # Prompt user for API server advertise address
-read -p "Enter the API server advertise address (e.g., 172.31.47.64): " apiserver_address
+read -p "Enter the API server advertise address (i.e private ipv4 address e.g., 172.31.47.64): " apiserver_address
 
 # Initialize the Master Node with user-provided address
 sudo kubeadm init --apiserver-advertise-address=$apiserver_address --pod-network-cidr=192.168.0.0/16
