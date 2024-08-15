@@ -2,15 +2,6 @@
 
 # INSTALL KUBERNETES ON ubuntu Master
 
-# set hostname
-sudo hostnamectl set-hostname \
-$(curl -s http://169.254.169.254/latest/meta-data/local-hostname)
-
-cat <<EOF > /etc/sysctl.d/k8s.conf
-net.bridge.bridge-nf-call-ip6tables = 1
-net.bridge.bridge-nf-call-iptables = 1
-EOF
-sysctl --system
 
 # Update package manager
 sudo apt-get update -y
@@ -52,27 +43,11 @@ sudo systemctl enable --now kubelet
 sudo systemctl restart kubelet
 
 # Prompt user for API server advertise address
-# read -p "Enter the API server advertise address (i.e private ipv4 address e.g., 172.31.47.64): " apiserver_address
+ read -p "Enter the API server advertise address (i.e private ipv4 address e.g., 172.31.47.64): " apiserver_address
 
 # Initialize the Master Node with user-provided address
-#sudo kubeadm init --apiserver-advertise-address=$apiserver_address --pod-network-cidr=192.168.0.0/16
+sudo kubeadm init --apiserver-advertise-address=$apiserver_address --pod-network-cidr=192.168.0.0/16
 
-# Setup Network with AWS provider
-cat << EOF > /etc/kubernetes/aws.yaml  
-apiVersion: kubeadm.k8s.io/v1beta2
-kind: ClusterConfiguration
-networking:
-  serviceSubnet: "10.0.0.0/16"
-  podSubnet: "10.100.0.0/24"
-apiServer:
-  extraArgs:
-    cloud-provider: "aws"
-controllerManager:
-  extraArgs:
-    cloud-provider: "aws"
-EOF
-
-kubeadm init --config /etc/kubernetes/aws.yaml
 
 # Set up the local kubeconfig file
 mkdir -p $HOME/.kube
