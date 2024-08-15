@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# INSTALL KUBERNETES ON AMAZON LINUX 2 Master
+# INSTALL KUBERNETES ON ubuntu Master
 
 # Update package manager
-yum update -y
+sudo apt-get update -y
 
 # Install Docker
-sudo yum install docker -y 
+sudo apt-get install docker.io -y 
 
 # Enable Docker
 sudo systemctl enable docker
@@ -15,26 +15,27 @@ sudo systemctl enable docker
 sudo systemctl start docker
 
 # Disable Swap on all nodes
- swapoff -a
+sudo swapoff -a
 
 # Install kubeadm, kubelet, and kubectl
 
-# Set SELinux in permissive mode (effectively disabling it)
-sudo setenforce 0
-sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+# Install required packages
+sudo apt-get install -y apt-transport-https ca-certificates curl
 
-# This overwrites any existing configuration in /etc/yum.repos.d/kubernetes.repo
-cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-name=Kubernetes
-baseurl=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/
-enabled=1
-gpgcheck=1
-gpgkey=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/repodata/repomd.xml.key
-exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
-EOF
+# Add Kubernetes GPG key
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
-sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+# Add Kubernetes repository
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+# Update package list
+sudo apt-get update
+
+# Install kubelet, kubeadm and kubectl
+sudo apt-get install -y kubelet kubeadm kubectl
+
+# Hold these packages at their installed version
+sudo apt-mark hold kubelet kubeadm kubectl
 
 sudo systemctl enable --now kubelet
 
