@@ -2,6 +2,16 @@
 
 # INSTALL KUBERNETES ON ubuntu Worker
 
+# set hostname
+sudo hostnamectl set-hostname \
+$(curl -s http://169.254.169.254/latest/meta-data/local-hostname)
+
+cat <<EOF > /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sysctl --system
+
 # Update package manager
 sudo apt-get update -y
 
@@ -40,5 +50,3 @@ sudo apt-mark hold kubelet kubeadm kubectl
 sudo systemctl enable --now kubelet
 
 sudo systemctl restart kubelet
-
-
