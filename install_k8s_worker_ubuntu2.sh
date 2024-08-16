@@ -12,8 +12,9 @@
 
 #Setup Kubernetes Master Node
 
-sudo hostnamectl set-hostname \
-$(curl -s http://169.254.169.254/latest/meta-data/local-hostname)
+# Set Hostname
+# TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` && sudo hostnamectl set-hostname $(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/local-hostname)
+
 
 cat <<EOF > /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
