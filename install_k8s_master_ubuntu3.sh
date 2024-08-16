@@ -2,6 +2,9 @@
 
 # INSTALL KUBERNETES ON ubuntu Master
 
+# Exit on error, undefined variable, or error in any pipeline
+set -euxo pipefail
+
 # Set Hostname
 TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` && sudo hostnamectl set-hostname $(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/local-hostname)
 
@@ -89,3 +92,9 @@ curl https://raw.githubusercontent.com/projectcalico/calico/v3.28.1/manifests/ca
 
 # Apply the Calico network plugin manifest
 kubectl apply -f calico.yaml
+
+sleep 60
+
+kubectl get nodes
+
+echo " K8s Master Setup has completed"
