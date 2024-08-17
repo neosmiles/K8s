@@ -3,7 +3,7 @@
 # INSTALL KUBERNETES ON ubuntu Master
 
 # Exit on error, undefined variable, or error in any pipeline
-set -euxo pipefail
+#set -euxo pipefail
 
 # Set Hostname
 TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` && sudo hostnamectl set-hostname $(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/local-hostname)
@@ -61,22 +61,11 @@ sudo systemctl enable --now kubelet
 sudo systemctl restart kubelet
 
 
-# Setup Network with AWS provider
-cat << EOF > /etc/kubernetes/aws.yaml  
-apiVersion: kubeadm.k8s.io/v1beta3
-kind: ClusterConfiguration
-networking:
-  serviceSubnet: "10.0.0.0/16"
-  podSubnet: "10.100.0.0/24"
-apiServer:
-  extraArgs:
-    cloud-provider: "aws"
-controllerManager:
-  extraArgs:
-    cloud-provider: "aws"
-EOF
+# Prompt user for API server advertise address
+ read -p "Enter the API server advertise address (i.e private ipv4 address e.g., 172.31.47.64): " apiserver_address
 
-kubeadm init --config /etc/kubernetes/aws.yaml
+# Initialize the Master Node with user-provided address
+sudo kubeadm init --apiserver-advertise-address=$apiserver_address --pod-network-cidr=192.168.0.0/16
 
 
 

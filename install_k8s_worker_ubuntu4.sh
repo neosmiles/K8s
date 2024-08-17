@@ -3,7 +3,7 @@
 # INSTALL KUBERNETES ON ubuntu Master
 
 # Exit on error, undefined variable, or error in any pipeline
-set -euxo pipefail
+#set -euxo pipefail
 
 # Set Hostname
 TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` && sudo hostnamectl set-hostname $(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/local-hostname)
@@ -59,42 +59,3 @@ sudo apt-mark hold kubelet kubeadm kubectl
 sudo systemctl enable --now kubelet
 
 sudo systemctl restart kubelet
-
-
-# Setup Network with AWS provider
-cat << EOF > /etc/kubernetes/aws.yaml  
-apiVersion: kubeadm.k8s.io/v1beta3
-kind: ClusterConfiguration
-networking:
-  serviceSubnet: "10.0.0.0/16"
-  podSubnet: "10.100.0.0/24"
-apiServer:
-  extraArgs:
-    cloud-provider: "aws"
-controllerManager:
-  extraArgs:
-    cloud-provider: "aws"
-EOF
-
-kubeadm init --config /etc/kubernetes/aws.yaml
-
-
-
-# Set up the local kubeconfig file
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
-# Install Calico Network Plugin
-
-# Download the Calico manifest
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.28.1/manifests/calico-typha.yaml -o calico.yaml
-
-# Apply the Calico network plugin manifest
-kubectl apply -f calico.yaml
-
-sleep 60
-
-kubectl get nodes
-
-echo " K8s Master Setup has completed"
